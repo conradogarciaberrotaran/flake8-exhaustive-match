@@ -1,6 +1,6 @@
 import ast
 
-from flake8_match_exhaustiveness.plugin import MatchExhaustivenessChecker
+from flake8_exhaustive_match.plugin import MatchExhaustivenessChecker
 
 
 def test_match_is_exhaustive_with_wildcard():
