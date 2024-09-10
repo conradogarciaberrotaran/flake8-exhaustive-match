@@ -74,10 +74,7 @@ def f(x: Colors):
     checker = MatchExhaustivenessChecker(tree)
     errors = list(checker.run())
     assert len(errors) == 1
-    assert (
-        errors[0][2]
-        == "MEX001 match statement is not exhaustive: Missing enum values for ['BLUE']"
-    )
+    assert errors[0][2] == "MEX001 match statement is not exhaustive"
 
 
 def test_match_not_exhaustive_with_multiple_missing_enum():
@@ -98,7 +95,4 @@ def f(x: Colors):
     checker = MatchExhaustivenessChecker(tree)
     errors = list(checker.run())
     assert len(errors) == 1
-    assert (
-        errors[0][2]
-        == "MEX001 match statement is not exhaustive: Missing enum values for ['BLUE', 'GREEN']"
-    )
+    assert errors[0][2] == "MEX001 match statement is not exhaustive"

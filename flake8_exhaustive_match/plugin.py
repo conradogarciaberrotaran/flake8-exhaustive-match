@@ -2,9 +2,6 @@ import ast
 from typing import Dict, List
 
 
-class MatchNotExhaustiveException(BaseException): ...
-
-
 class MatchExhaustivenessChecker:
     name = "flake8-match-exhaustiveness"
     version = "0.1.0"
@@ -16,17 +13,15 @@ class MatchExhaustivenessChecker:
     def run(self):
         for node in ast.walk(self.tree):
             if isinstance(node, ast.Match):
-                try:
-                    self.check_exhaustiveness(node)
-                except MatchNotExhaustiveException as e:
+                if not self.is_exhaustive(node):
                     yield (
                         node.lineno,
                         node.col_offset,
-                        f"MEX001 match statement is not exhaustive: {e}",
+                        "MEX001 match statement is not exhaustive",
                         type(self),
                     )
 
-    def check_exhaustiveness(self, match_node: ast.Match) -> None:
+    def is_exhaustive(self, match_node: ast.Match) -> bool:
         match_var = match_node.subject
 
         if isinstance(match_var, ast.Name):
@@ -36,20 +31,14 @@ class MatchExhaustivenessChecker:
                     for case in match_node.cases
                     if isinstance(case.pattern, ast.MatchValue)
                 ]
-                missing_values = set(enum_values) - set(matched_values)
-
-                if missing_values:
-                    raise MatchNotExhaustiveException(
-                        f"Missing enum values for {sorted(missing_values)}"
-                    )
+                return set(matched_values) == set(enum_values)
 
         has_wildcard = any(
             isinstance(case.pattern, ast.MatchAs) and case.pattern.name is None
             for case in match_node.cases
         )
 
-        if not has_wildcard:
-            return None
+        return has_wildcard
 
     def _find_enums(self, tree: ast.AST) -> Dict[str, List[str]]:
         enums = {}
